@@ -4,6 +4,8 @@ import numpy
 from numpy import random, isnan, isinf
 
 eps = sys.float_info.epsilon
+nan = float('nan')
+inf = float('inf')
 
 # Globals set by set_format.
 precision_  = None
@@ -39,7 +41,7 @@ set_format( 4 )
 #-------------------------------------------------------------------------------
 def fmt( x ):
     abs_val = abs( x )
-    if (abs_val >= f_hi_):
+    if (not (abs_val < f_hi_)):  # `not <` catches NaN that `>=` would not.
         # Large values print as exponent (e).
         return f'{x:#{width_}.{precision_ - 1}e}'
 
@@ -80,6 +82,10 @@ def test():
     A[ ii, jj ] = 0
     print( f'small entries set to 0.\n{A};\n' )
 
+    (ii, jj) = numpy.where( A >= 0.9 )
+    A[ ii, jj ] = inf
+    print( f'large entries set to inf.\n{A};\n' )
+
     for i in range( n ):
         A[ i, i ] = 1
     print( f'diagonal entries set to 1.\n{A}\n' )
@@ -99,6 +105,11 @@ def test():
     seperator = [ None, None ]
 
     numbers = [
+        # Test special values.
+        [ 'nan',  nan  ],
+        [ 'inf',  inf  ],
+        [ '-inf', -inf ],
+
         # Test near i_hi. Prints as:
         [ '-i_hi - 1',  -i_hi - 1   ],  # g
         [ '-i_hi',      -i_hi       ],  # g
